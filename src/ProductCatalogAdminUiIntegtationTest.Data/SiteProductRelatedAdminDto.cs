@@ -1,0 +1,15 @@
+﻿namespace ProductCatalogAdminUiIntegrationTest.Data
+{
+	public class SiteProductRelatedAdminDto
+	{
+		public int SiteProductId { get; set; }
+
+		public string Name { get; set; }
+
+		public int SiteId { get; set; }
+
+		public string SiteName { get; set; }
+
+		public string PublishStatus { get; set; }
+	}
+}
