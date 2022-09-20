@@ -3,17 +3,16 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System;
-using System.Configuration;
 using System.Linq;
 using System.Threading;
 
 namespace ProductCatalogAdminUiIntegrationTest.Core.Utility
 {
-	/// <summary>
-	/// This class is used to interact with the browser itself.
-	/// Its primary functions are to navigate to Urls passed in by the user and to refresh the browser when necessary.
-	/// </summary>
-	public static class BrowserUtility
+    /// <summary>
+    /// This class is used to interact with the browser itself.
+    /// Its primary functions are to navigate to Urls passed in by the user and to refresh the browser when necessary.
+    /// </summary>
+    public static class BrowserUtility
 	{
         private static readonly IConfiguration Configuration = InitConfiguration();
 		//Timeout used for UI loading actions
@@ -62,7 +61,10 @@ namespace ProductCatalogAdminUiIntegrationTest.Core.Utility
 			}
 			else
 			{
-				WebDriver = new ChromeDriver();
+                var option = new ChromeOptions();
+                option.AddArgument("--incognito");
+				WebDriver = new ChromeDriver(option);
+				//WebDriver = new ChromeDriver();
 			}
 
 			var uri = isInternal ? new Uri(BaseUri, url) : new Uri(url);
@@ -115,7 +117,7 @@ namespace ProductCatalogAdminUiIntegrationTest.Core.Utility
 		/// <param name="waitFor"></param>
 		public static void NavigateToPage(string pageName, string id = null, int waitFor = 10000)
 		{
-			WebDriver.Navigate().GoToUrl(new Uri(BaseUri, $"{pageName}/{id}"));
+			WebDriver.Navigate().GoToUrl(new Uri(BaseUri, $"{pageName}"));
 			WaitForPageToLoad();
 			WaitForOverlayToDisappear();
 			Thread.Sleep(waitFor);

@@ -9,7 +9,7 @@ namespace ProductCatalogAdminUiIntegrationTest.Model.Pages
 	{
 		#region Variables and constructor
 
-		private const string PageUrl = "/categories";
+		private const string PageUrl = "";
 
 		public CategoriesPage()
 		{

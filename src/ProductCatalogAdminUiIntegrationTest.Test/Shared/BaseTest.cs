@@ -15,11 +15,9 @@ using ProductCatalogAdminUiIntegrationTest.Model.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Windows.Forms;
 using ContentType = ProductCatalogAdminUiIntegrationTest.Data.Shared.ContentType;
 using Control = ProductCatalogAdminUiIntegrationTest.Core.SeleniumCore.Control;
 using ProductUpdateRequest = ProductCatalogAdminUiIntegrationTest.Data.Request.MessageApi.ProductUpdateRequest;
@@ -181,41 +179,7 @@ namespace ProductCatalogAdminUiIntegrationTest.Test.Shared
 			}
 		}
 
-		protected void SelectAssetForOpenFileDialog(string assetFileName)
-		{
-			var fileLocation = GetAssetFileLocation(assetFileName);
-			SendKeys.SendWait($"{fileLocation}{{ENTER}}");
-			Log($"Selected the file. FileName: {assetFileName}");
-			Thread.Sleep(2500);
-		}
-
-		protected void SelectMultipleFilesForOpenFileDialog(List<string> screenshotImageFiles)
-		{
-			var file1Location = GetAssetFileLocation(screenshotImageFiles[0]);
-			var file2location = GetAssetFileLocation(screenshotImageFiles[1]);
-			var file3location = GetAssetFileLocation(screenshotImageFiles[2]);
-
-			SendKeys.SendWait($"\"{file1Location}\"+ +\"{file2location}\" + +\"{file3location}\"{{ENTER}}");
-			Log($"Selected the file. FileName: {screenshotImageFiles[0]} and {screenshotImageFiles[1]}");
-			Thread.Sleep(2500);
-		}
-
-		protected (string Content, string Extension) GetBase64Asset(string assetFileName)
-		{
-			var fileLocation = GetAssetFileLocation(assetFileName);
-			var file = new FileInfo(fileLocation);
-			return (Convert.ToBase64String(File.ReadAllBytes(fileLocation)), file.Extension);
-		}
-
-		private string GetAssetFileLocation(string assetFileName)
-		{
-			var currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-			var fileLocation = $@"{Directory.GetParent(currentDirectory).Parent.Parent.Parent.Parent.FullName}\Assets\{assetFileName}";
-			Log($"Full path of file: {fileLocation}");
-			return fileLocation;
-		}
-
-		private List<string> validateNotNullAndLog(string columnName, int rows = 10)
+        private List<string> validateNotNullAndLog(string columnName, int rows = 10)
         {
 			var cellTextValues = new List<string>();
 			for (var i = 1; i <= rows; i++)
@@ -533,22 +497,6 @@ namespace ProductCatalogAdminUiIntegrationTest.Test.Shared
 			return getResponse.Result.Single();
 		}
 
-		protected (string ProductId, string ProductFileId) PostAndNavigateToProduct(ProductsPage page, string productName, string productWebsiteUrl, bool includeLogo = false, bool navigateToPage = true)
-		{
-			//Open the page
-			OpenPage(page);
-
-			//Setup data by creating a new product
-			var (productId, productFileId) = PostProduct(productName, productWebsiteUrl, includeLogo);
-
-			if (navigateToPage)
-			{
-				BrowserUtility.NavigateToPage(BrowserUtility.ProductPageName, productId);
-			}
-
-			return (productId, productFileId);
-		}
-
 		protected (string ProductId, string ProductFileId) PostProduct(string productName, string productWebsiteUrl, bool includeLogo = false, int? vendorId = null)
 		{
 			//Setup data by creating a new product
@@ -604,53 +552,7 @@ namespace ProductCatalogAdminUiIntegrationTest.Test.Shared
 			Log($"Deleted vendor successfully. Id: {vendorId}");
 		}
 
-		protected void AssertVendorInformation(string vendorName, string vendorWebsiteUrl, string streetAddress1, string streetAddress2, string stateProvince, string city, string zipPostalCode, string countryName, VendorPage page)
-		{
-			//Assert the vendor was created and displayed information is correct
-			AssertVendorInUi(vendorName, vendorWebsiteUrl, page);
-
-			//Assert the address information using the Api
-			var vendorId = VendorAdminApiService.SearchVendors(new VendorSearchRequest { TextFilter = vendorName }).Result.Single().VendorId;
-			var getResponse = VendorAdminApiService.GetVendorById(vendorId);
-			Assert.AreEqual(streetAddress1, getResponse.Address.StreetAddress1);
-			Assert.AreEqual(streetAddress2, getResponse.Address.StreetAddress2);
-			Assert.AreEqual(stateProvince, getResponse.Address.StateProvinceRegionName);
-			Assert.AreEqual(city, getResponse.Address.City);
-			Assert.AreEqual(zipPostalCode, getResponse.Address.ZipPostalCode);
-			Assert.AreEqual(countryName, getResponse.Address.CountryName);
-		}
-
-		protected void AssertVendorInUi(string vendorName, string vendorWebsiteUrl, VendorPage page)
-		{
-			BrowserUtility.Refresh();
-			BrowserUtility.WaitForPageToLoad();
-			Thread.Sleep(5000);
-
-			//Assert the vendor was created and displayed information is correct
-			Assert.AreEqual(vendorName, page.DetailsVendorName.GetText(false));
-			Assert.AreEqual(vendorWebsiteUrl, page.DetailsVendorWebsiteUrl.GetText(false));
-		}
-
-		protected void AssertVendorDetails(string vendorName, string vendorWebsiteUrl, string streetAddress1, string streetAddress2, string stateProvince, string city, string zipPostalCode, string countryName,
-			string yearFounded, string phoneNumber, string about, VendorPage page)
-		{
-			AssertVendorInUi(vendorName, vendorWebsiteUrl, page);
-
-			//Assert the address information using the Api
-			var vendorId = VendorAdminApiService.SearchVendors(new VendorSearchRequest { TextFilter = vendorName }).Result.Single().VendorId;
-			var getResponse = VendorAdminApiService.GetVendorById(vendorId);
-			Assert.AreEqual(streetAddress1, getResponse.Address.StreetAddress1);
-			Assert.AreEqual(streetAddress2, getResponse.Address.StreetAddress2);
-			Assert.AreEqual(stateProvince, getResponse.Address.StateProvinceRegionName);
-			Assert.AreEqual(city, getResponse.Address.City);
-			Assert.AreEqual(zipPostalCode, getResponse.Address.ZipPostalCode);
-			Assert.AreEqual(countryName, getResponse.Address.CountryName);
-			Assert.AreEqual(yearFounded, getResponse.YearFounded);
-			Assert.AreEqual(phoneNumber, getResponse.PhoneNumber);
-			Assert.AreEqual(about, getResponse.About);
-		}
-
-		protected VendorDto GetVendor(string vendorId)
+        protected VendorDto GetVendor(string vendorId)
 		{
 			var getResponse = VendorAdminApiService.GetVendorById(vendorId);
 			Log($"Vendor retrieved successfully. VendorId: {vendorId}");

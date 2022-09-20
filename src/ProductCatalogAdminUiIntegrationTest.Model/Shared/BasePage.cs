@@ -44,38 +44,38 @@ namespace ProductCatalogAdminUiIntegrationTest.Model.Shared
 			BrowserUtility.WebDriver.Manage().Window.Maximize();
 			BrowserUtility.WaitForPageToLoad();
 			BrowserUtility.WaitForOverlayToDisappear();
-			var jsExecutor = (IJavaScriptExecutor)BrowserUtility.WebDriver;
-			Thread.Sleep(1000);
-			var userData = JObject.Parse(jsExecutor.ExecuteScript($"return window.sessionStorage.getItem('userData_{Configuration.GetValue<string>("OktaClientId")}');").ToString());
-			UserDataFirstName = userData.Property("given_name", StringComparison.InvariantCultureIgnoreCase)?.Value.Value<string>();
-			UserDataLastName = userData.Property("family_name", StringComparison.InvariantCultureIgnoreCase)?.Value.Value<string>();
-
-			var authorizationResult = JObject.Parse(jsExecutor.ExecuteScript($"return window.sessionStorage.getItem('authorizationResult_{Configuration.GetValue<string>("OktaClientId")}');").ToString());
-			_bearerToken = authorizationResult.Property("access_token", StringComparison.InvariantCultureIgnoreCase)?.Value.Value<string>();
-			BrandedResearchAdminApiService.InitializeHttpClient(_bearerToken);
-			CategoryAdminApiService.InitializeHttpClient(_bearerToken);
-			ProductAdminApiService.InitializeHttpClient(_bearerToken);
-			VendorAdminApiService.InitializeHttpClient(_bearerToken);
 		}
 
 		private static void Login()
 		{
 			BrowserUtility.WaitForPageToLoad();
-			Thread.Sleep(10000);
+			Thread.Sleep(5000);
+			SignInWithGoogle.ClickAndWaitForPageToLoad();
 			LoginInputUsername.SendKeys(OktaUsername);
 			LoginButtonNext.ClickAndWaitForPageToLoad();
-			LoginInputPassword.SendKeys(OktaPassword);
-			LoginButtonVerify.ClickAndWaitForPageToLoad();
+			// Captcha delay
+            Thread.Sleep(10000);
+            LoginButtonNext.ClickAndWaitForPageToLoad();
+            Thread.Sleep(15000);
+			// Okta login
+			LoginOktaInputUsername.SendKeys(OktaUsername);
+            LoginOktaButtonNext.ClickAndWaitForPageToLoad();
+            LoginOktaInputPassword.SendKeys(OktaPassword);
+            LoginOktaButtonVerify.ClickAndWaitForPageToLoad();
 		}
 
 		#endregion
 
 		#region Login info
 
-		private static readonly Control LoginInputUsername = new Control("[id='okta-signin-username']");
-		private static readonly Control LoginButtonNext = new Control("[id='okta-signin-submit']");
-		private static readonly Control LoginInputPassword = new Control("[id='input59']");
-		private static readonly Control LoginButtonVerify = new Control("[type='submit']");
+        private static readonly Control SignInWithGoogle = new Control("[href='/auth/login']");
+		private static readonly Control LoginInputUsername = new Control("[id='identifierId']");
+		private static readonly Control LoginButtonNext = new Control("div#identifierNext div button");
+
+        private static readonly Control LoginOktaInputUsername = new Control("[id='okta-signin-username']");
+        private static readonly Control LoginOktaButtonNext = new Control("[id='okta-signin-submit']");
+        private static readonly Control LoginOktaInputPassword = new Control("[id='input59']");
+        private static readonly Control LoginOktaButtonVerify = new Control("[type='submit']");
 
 		#endregion
 
@@ -84,10 +84,11 @@ namespace ProductCatalogAdminUiIntegrationTest.Model.Shared
 		public readonly Control LinkSideNavProductMapping = new Control("[href='/site-products/mapping']");
 		public readonly Control LinkSideNavProducts = new Control("[href='/products']");
         public readonly Control LinkSideNavCategories = new Control("[href='/categories']");
-		public readonly Control UnsavedChangesDialogSupportingText = new Control(ControlUtility.GetElementSelector("unsaved-changes-warning-dialog-supporting-text"));
 
 		#region Common Filters
 
+        public readonly Control InputReviewerUrl = new Control("reviewer-proof-link-add div input");
+        public readonly Control ButtonReviewerUrlSave = new Control("reviewer-proof-link-add div button");
 		public readonly Control InputFilterCategoryName = new Control(ControlUtility.GetElementSelector("input-category-name"));
 		public readonly Control InputFilterProductName = new Control(ControlUtility.GetElementSelector("input-product-name"));
 		
